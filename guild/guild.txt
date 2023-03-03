@@ -1,0 +1,16 @@
+composer require laravel/sail --dev
+php artisan sail:install
+./vendor/bin/sail up
+
+npm i --legacy-peer-deps
+
+export NODE_OPTIONS=--openssl-legacy-provider
+
+git rm -r --cached .
+
+
+
+rm -rf public/storage
+php artisan storage:link
+sudo chmod -R o+rw bootstrap/cache
+sudo chmod -R o+rw storage

@@ -1,0 +1,72 @@
+/*================================================================================
+
+NOTE:
+------
+PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
+WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+@import 'https://fonts.googleapis.com/css?family=Prompt:300,400,500,600,700';
+
+body {
+    font-family: 'Prompt';
+    background-color: rgb(255, 255, 255) !important;
+}
+
+.header-navbar {
+    font-family: 'Prompt';
+}
+
+.button {
+    font-family: 'Prompt';
+}
+
+.brand-text {
+    color: #000 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01rem ;
+    font-size: 1.2rem !important;
+}
+
+.brand-text-vertical {
+    font-size: 0.8rem !important;
+}
+
+.sub-brand-text {
+    color: #000 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01rem;
+    font-size: 1rem;
+}
+
+.sub-brand-text-vertical {
+    font-size: 0.6rem !important;
+}
+
+.footer-custom {
+    background-color: #ffcb05;
+}
+
+.header-navbar .navbar-container ul.navbar-nav li > a.nav-link {
+    color: #000;
+}
+
+.horizontal-menu .header-navbar.navbar-horizontal.floating-nav {
+    top: 43px !important;
+    width: calc(100vw - (100vw - 100%) - calc(1rem * 0)) !important;
+    background: #ffcb05 !important;
+}
+
+.horizontal-menu .header-navbar.navbar-horizontal ul#main-menu-navigation > li.active > a {
+    // background: none !important;
+    // text-decoration: underline;
+    // rgba(253, 221, 91, 0.7)
+    // rgba(255, 203, 5, 0.7);
+    // background: linear-gradient(118deg, #ffffff, rgba(255, 203, 5, 0.7)) !important;
+    background: #f8f8f8 !important;
+    border-radius: 4px !important;
+    color: #000 !important;
+}
+
+.horizontal-menu .header-navbar.navbar-brand-center .navbar-header .navbar-brand .brand-logo img {
+    max-width: 60px !important;
+}
+// $font-family: "Gill Sans Extrabold", sans-serif;
