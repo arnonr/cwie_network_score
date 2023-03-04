@@ -11,6 +11,11 @@ use App\Http\Controllers\FixController;
 use App\Http\Controllers\FixStatusController;
 use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ProjectTypeController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ScoreController;
+use App\Http\Controllers\UniversityController;
+use App\Http\Controllers\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +99,54 @@ Route::group(['prefix' => 'fix-status'], function () {
     Route::put('/', [FixStatusController::class, 'edit']);
     Route::delete('/{id}', [FixStatusController::class, 'delete']);
 });
+
+Route::group(['prefix' => 'project-type'], function () {
+    Route::get('/{id}', [ProjectTypeController::class, 'get']);
+    Route::get('/', [ProjectTypeController::class, 'getAll']);
+    Route::post('/', [ProjectTypeController::class, 'add']);
+    Route::put('/{id}', [ProjectTypeController::class, 'edit']);
+    Route::delete('/{id}', [ProjectTypeController::class, 'delete']);
+});
+
+Route::group(['prefix' => 'question'], function () {
+    Route::get('/{id}', [QuestionController::class, 'get']);
+    Route::get('/', [QuestionController::class, 'getAll']);
+    Route::post('/', [QuestionController::class, 'add']);
+    Route::put('/{id}', [QuestionController::class, 'edit']);
+    Route::delete('/{id}', [QuestionController::class, 'delete']);
+});
+
+Route::group(['prefix' => 'score'], function () {
+    Route::get('/{id}', [ScoreController::class, 'get']);
+    Route::get('/', [ScoreController::class, 'getAll']);
+    Route::post('/', [ScoreController::class, 'add']);
+    Route::put('/{id}', [ScoreController::class, 'edit']);
+    Route::delete('/{id}', [ScoreController::class, 'delete']);
+});
+
+Route::group(['prefix' => 'university'], function () {
+    Route::get('/{id}', [UniversityController::class, 'get']);
+    Route::get('/', [UniversityController::class, 'getAll']);
+    Route::post('/', [UniversityController::class, 'add']);
+    Route::put('/{id}', [UniversityController::class, 'edit']);
+    Route::delete('/{id}', [UniversityController::class, 'delete']);
+});
+
+Route::group(['prefix' => 'project'], function () {
+    Route::get('/{id}', [ProjectController::class, 'get']);
+    Route::get('/', [ProjectController::class, 'getAll']);
+    Route::post('/', [ProjectController::class, 'add']);
+    Route::put('/{id}', [ProjectController::class, 'edit']);
+    Route::delete('/{id}', [ProjectController::class, 'delete']);
+});
+
+
+
+
+// use App\Http\Controllers\ProjectTypeController;
+// use App\Http\Controllers\QuestionController;
+// use App\Http\Controllers\ScoreController;
+// use App\Http\Controllers\UniversityController;
 
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

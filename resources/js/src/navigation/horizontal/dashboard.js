@@ -6,7 +6,7 @@ export default [
   },
   {
     title: "เว็บไซต์/Website",
-    href: "http://sci.kmutnb.ac.th",
+    href: "http://www.tgde.kmutnb.ac.th/cwie_network/",
     icon: "ExternalLinkIcon",
     
     resource: "Auth",
@@ -33,6 +33,34 @@ export default [
   //   resource: "Auth",
   //   action: "read",
   // },
+  {
+    title: "จัดการผลงาน",
+    route: "project-list",
+    icon: "UsersIcon",
+    resource: "AdminUser",
+    action: "manage",
+  },
+  {
+    title: "จัดการประเภทการประกวด",
+    route: "project-type-list",
+    icon: "UsersIcon",
+    resource: "AdminUser",
+    action: "manage",
+  },
+  {
+    title: "จัดการสถานศึกษา",
+    route: "university-list",
+    icon: "UsersIcon",
+    resource: "AdminUser",
+    action: "manage",
+  },
+  {
+    title: "จัดการคำถาม",
+    route: "question-list",
+    icon: "UsersIcon",
+    resource: "AdminUser",
+    action: "manage",
+  },
   {
     title: "จัดการผู้ใช้งาน/User",
     route: "user-list",

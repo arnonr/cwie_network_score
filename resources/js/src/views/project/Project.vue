@@ -16,6 +16,7 @@ import {
   BTable,
   BForm,
   BModal,
+  BFormTextarea,
 } from "bootstrap-vue";
 import vSelect from "vue-select";
 
@@ -33,7 +34,7 @@ import {
   computed,
 } from "@vue/composition-api";
 import store from "@/store";
-import userStoreModule from "./userStoreModule";
+import projectStoreModule from "./projectStoreModule";
 import { useToast } from "vue-toastification/composition";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";
 import Swal from "sweetalert2";
@@ -65,13 +66,14 @@ export default {
     ValidationProvider,
     ValidationObserver,
     required,
+    BFormTextarea,
   },
   setup() {
-    const USER_APP_STORE_MODULE_NAME = "user-list";
+    const PROJECT_APP_STORE_MODULE_NAME = "project-list";
 
     // Register module
-    if (!store.hasModule(USER_APP_STORE_MODULE_NAME))
-      store.registerModule(USER_APP_STORE_MODULE_NAME, userStoreModule);
+    if (!store.hasModule(PROJECT_APP_STORE_MODULE_NAME))
+      store.registerModule(PROJECT_APP_STORE_MODULE_NAME, projectStoreModule);
 
     onUnmounted(() => {});
 
@@ -102,11 +104,21 @@ export default {
     const currentPage = ref(1);
     const totalPage = ref(1);
     const totalItems = ref(0);
-    const orderBy = ref({
-      title: "ชื่อ",
-      code: "firstname",
-    });
-    const order = ref({ title: "DESC", code: "desc" });
+    const orderBy = ref(
+      {
+        title: "ประเภทการประกวด",
+        code: "project_type.name",
+      },
+      {
+        title: "รหัส",
+        code: "code",
+      },
+      {
+        title: "สถานศึกษา",
+        code: "university.name",
+      }
+    );
+    const order = ref({ title: "ASC", code: "asc" });
 
     const fields = reactive([
       {
@@ -115,107 +127,76 @@ export default {
         visible: false,
       },
       {
-        key: "firstname",
-        label: "ชื่อ",
+        key: "code",
+        label: "รหัส",
         sortable: true,
         visible: true,
-        class: "text-center",
-        tdClass: "mw-3-5",
       },
       {
-        key: "username",
-        label: "username",
+        key: "university_name",
+        label: "สถานศึกษา",
         sortable: true,
         visible: true,
-        class: "text-center",
-        tdClass: "mw-3-5",
-      },
-      {
-        key: "tel",
-        label: "โทรศัพท์",
-        sortable: true,
-        visible: true,
-        class: "text-center",
+        thStyle: {
+          width: "400px",
+        },
       },
       {
         key: "project_type_name",
-        label: "ประเภทตัดสิน",
+        label: "ประเภทการประกวด",
         sortable: true,
         visible: true,
-        class: "text-center",
-      },
-      {
-        key: "type",
-        label: "ประเภทผู้ใช้งาน",
-        sortable: true,
-        visible: true,
-        class: "text-center",
+        thStyle: {
+          width: "400px",
+        },
       },
       {
         key: "action",
-        label: "Action",
+        label: "จัดการ",
         visible: true,
         class: "text-center",
-        tdClass: "mw-8",
       },
     ]);
 
     const visibleFields = computed(() => fields.filter((f) => f.visible));
 
     const advancedSearch = reactive({
-      fullname: "",
-      firstname: "",
-      lastname: "",
-      username: "",
+      code: "",
       project_type_id: null,
-      type: null,
+      university_id: null,
     });
 
     const resetAdvancedSearch = () => {
-      advancedSearch.fullname = "";
-      advancedSearch.firstname = "";
-      advancedSearch.lastname = "";
-      advancedSearch.username = "";
+      advancedSearch.code = "";
       advancedSearch.project_type_id = null;
-      advancedSearch.type = null;
+      advancedSearch.university_id = null;
     };
 
     const item = ref({
-      username: "",
-      email: "",
-      type: "",
+      code: "",
+      university_id: null,
+      project_type_id: null,
+      status: 1,
+      is_publish: 1,
     });
 
     const selectOptions = ref({
-      perPage: [
-        { title: "20", code: 20 },
-        { title: "50", code: 50 },
-      ],
+      perPage: [{ title: "50", code: 50 }],
       orderBy: [
-        { title: "ชื่อ", code: "firstname" },
-        { title: "username", code: "username" },
-        { title: "ประเภทตัดสิน", code: "project_type_name" },
-        { title: "ประเภทผู้ใช้", code: "type" },
+        { title: "ประเภทการประกวด", code: "project_type.name" },
+        { title: "รหัส", code: "code" },
+        { title: "สถานศึกษา", code: "university.name" },
       ],
       order: [
         { title: "ASC", code: "asc" },
         { title: "DESC", code: "desc" },
       ],
-      status: [
-        { title: "อนุมัติ", code: 2 },
-        { title: "บล็อก", code: 3 },
-      ],
-      types: [
-        { title: "Admin", code: "admin" },
-        { title: "Staff", code: "staff" },
-        { title: "Referee", code: "referee" },
-        { title: "User", code: "user" },
-      ],
       project_types: [],
+      universities: [],
     });
 
     store
-      .dispatch("user-list/fetchProjectTypes")
+      .dispatch("project-list/fetchProjectTypes")
       .then((response) => {
         const { data } = response.data;
         selectOptions.value.project_types = data.map((d) => {
@@ -237,6 +218,29 @@ export default {
         });
       });
 
+    store
+      .dispatch("project-list/fetchUniversities")
+      .then((response) => {
+        const { data } = response.data;
+        selectOptions.value.universities = data.map((d) => {
+          return {
+            code: d.id,
+            title: d.name,
+          };
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        toast({
+          component: ToastificationContent,
+          props: {
+            title: "Error fetchingUniversitie's list",
+            icon: "AlertTriangleIcon",
+            variant: "danger",
+          },
+        });
+      });
+
     const fetchItems = () => {
       isOverLay.value = true;
 
@@ -247,14 +251,14 @@ export default {
         }
       }
 
-      if (search.type) {
-        if (search.type.hasOwnProperty("code")) {
-          search.type = search.type.code;
+      if (search.university_id) {
+        if (search.university_id.hasOwnProperty("code")) {
+          search.university_id = search.university_id.code;
         }
       }
 
       store
-        .dispatch("user-list/fetchUsers", {
+        .dispatch("project-list/fetchProjects", {
           perPage: perPage.value.code,
           currentPage: currentPage.value == 0 ? undefined : currentPage.value,
           orderBy: orderBy.value.code,
@@ -272,7 +276,7 @@ export default {
           toast({
             component: ToastificationContent,
             props: {
-              title: "Error fetching User's list",
+              title: "Error fetching Project's list",
               icon: "AlertTriangleIcon",
               variant: "danger",
             },
@@ -322,13 +326,13 @@ export default {
 
     const onDelete = (id) => {
       store
-        .dispatch("user-list/deleteUser", { id: id })
+        .dispatch("project-list/deleteProject", { id: id })
         .then((response) => {
           if (response.data.message == "success") {
             toast({
               component: ToastificationContent,
               props: {
-                title: "Success : Deleted User",
+                title: "Success : Deleted Project",
                 icon: "CheckIcon",
                 variant: "success",
               },
@@ -349,16 +353,15 @@ export default {
 
     const handleEditClick = (data) => {
       item.value = data;
+      item.value.project_type_id = {
+        title: data.project_type_name,
+        code: data.project_type_id,
+      };
 
-      item.value.type = selectOptions.value.types.find((t) => {
-        return t.code == data.type;
-      });
-
-      item.value.project_type_id = selectOptions.value.project_types.find(
-        (t) => {
-          return t.code == data.project_type_id;
-        }
-      );
+      item.value.university_id = {
+        title: data.university_name,
+        code: data.university_id,
+      };
 
       isAdd.value = false;
       isModal.value = true;
@@ -366,15 +369,11 @@ export default {
 
     const handleAddClick = () => {
       item.value = {
-        username: "",
-        email: "",
-        prefix: "",
-        firstname: "",
-        lastname: "",
-        tel: "",
+        code: "",
+        university_id: null,
         project_type_id: null,
-        type: null,
-        // status: 1
+        status: 1,
+        is_publish: 1,
       };
       isAdd.value = true;
       isModal.value = true;
@@ -389,6 +388,10 @@ export default {
       });
     };
 
+    watchEffect(() => {
+      fetchItems();
+    });
+
     const onSubmit = () => {
       // Prevent modal from closing
 
@@ -396,19 +399,17 @@ export default {
       isSubmit.value = true;
 
       let dataSend = {
-        email: item.value.username,
-        prefix: item.value.prefix,
-        firstname: item.value.firstname,
-        lastname: item.value.lastname,
-        type: item.value.type.code,
-        status: 2,
-        tel: item.value.tel,
+        code: item.value.code,
+        level: item.value.level,
         project_type_id: item.value.project_type_id.code,
+        university_id: item.value.university_id.code,
+        status: item.value.status,
+        is_publish: item.value.is_publish,
       };
 
       if (item.value.id == null) {
         store
-          .dispatch("user-list/addUser", dataSend)
+          .dispatch("project-list/addProject", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -420,7 +421,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Added User",
+                  title: "Success : Added Project",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -435,14 +436,14 @@ export default {
             isSubmit.value = false;
             isOverLay.value = false;
 
-            errorToast("Add User Error");
+            errorToast("Add Project Error");
           });
       } else {
         // Update
         dataSend["id"] = item.value.id;
 
         store
-          .dispatch("user-list/editUser", dataSend)
+          .dispatch("project-list/editProject", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -454,7 +455,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Updated User",
+                  title: "Success : Updated Project",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -469,7 +470,7 @@ export default {
           .catch(() => {
             isSubmit.value = false;
             isOverLay.value = false;
-            errorToast("Update User Error");
+            errorToast("Update Project Error");
           });
       }
     };
@@ -518,26 +519,33 @@ export default {
           </b-col>
         </b-row>
         <b-row>
-          <b-form-group label="ชื่อ-นามสกุล" label-for="Name" class="col-md-6">
+          <b-form-group label="รหัส" label-for="Code" class="col-md-6">
             <b-form-input
-              id="fullname"
-              v-model="advancedSearch.fullname"
-              placeholder="ชื่อ-นามสกุล..."
-            />
-          </b-form-group>
-
-          <b-form-group label="Username" label-for="Username" class="col-md-6">
-            <b-form-input
-              id="username"
-              v-model="advancedSearch.username"
-              placeholder="Username..."
+              id="code"
+              v-model="advancedSearch.code"
+              placeholder="รหัส..."
             />
           </b-form-group>
 
           <b-form-group
-            label="ประเภทตัดสิน"
-            label-for="project_type_id"
+            label="สถานศึกษา"
+            label-for="university_id"
             class="col-md-6"
+          >
+            <v-select
+              v-model="advancedSearch.university_id"
+              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
+              label="title"
+              :clearable="true"
+              placeholder="-- All University --"
+              :options="selectOptions.universities"
+            />
+          </b-form-group>
+
+          <b-form-group
+            label="ประเภทการประกวด"
+            label-for="project_type_id"
+            class="col-md-12"
           >
             <v-select
               v-model="advancedSearch.project_type_id"
@@ -546,21 +554,6 @@ export default {
               :clearable="true"
               placeholder="-- All Project Type --"
               :options="selectOptions.project_types"
-            />
-          </b-form-group>
-
-          <b-form-group
-            label="ประเภทผู้ใช้"
-            label-for="type"
-            class="col-md-6"
-          >
-            <v-select
-              v-model="advancedSearch.type"
-              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-              label="title"
-              :clearable="true"
-              placeholder="-- All Type --"
-              :options="selectOptions.types"
             />
           </b-form-group>
         </b-row>
@@ -574,7 +567,7 @@ export default {
         </b-row>
       </div>
     </b-card>
-
+    <!--  -->
     <b-card no-body>
       <b-overlay :show="isOverLay" opacity="0.3" spinner-variant="primary">
         <div class="m-2">
@@ -634,15 +627,17 @@ export default {
                 :items="items"
                 :fields="visibleFields"
               >
-                <template #cell(firstname)="row">
-                  {{
-                    row.item.prefix +
-                    row.item.firstname +
-                    " " +
-                    row.item.lastname
-                  }}
-                </template>
                 <template #cell(action)="row">
+                  <b-button
+                    variant="outline-info"
+                    alt="ดูข้อมูล"
+                    title="ดูข้อมูล"
+                    class="btn-icon btn-sm"
+                    :href="'http://localhost:8113/storage/document/'+row.item.code+'.pdf'"
+                    target="_blank"
+                  >
+                    <feather-icon icon="EyeIcon" style="margin-bottom: -2px" />
+                  </b-button>
                   <b-button
                     variant="outline-success"
                     alt="แก้ไข"
@@ -691,7 +686,7 @@ export default {
           cancel-title="Close"
           centered
           size="lg"
-          title="User Form"
+          title="Form"
           :visible="isModal"
           @ok="validationForm"
           :ok-disabled="isSubmit"
@@ -707,128 +702,21 @@ export default {
               <b-form>
                 <div class="row">
                   <b-form-group
-                    label="Username"
-                    label-for="username"
+                    label="ประเภทการประกวด"
+                    label-for="project_type_id"
                     class="col-md"
                   >
                     <validation-provider
                       #default="{ errors }"
-                      name="username"
-                      rules="required"
-                    >
-                      <b-form-input
-                        id="username"
-                        placeholder=""
-                        v-model="item.username"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="คำนำหน้า"
-                    label-for="prefix"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="prefix"
-                    >
-                      <b-form-input
-                        id="prefix"
-                        placeholder=""
-                        v-model="item.prefix"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ชื่อ"
-                    label-for="firstname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="firstname"
-                    >
-                      <b-form-input
-                        id="firstname"
-                        placeholder=""
-                        v-model="item.firstname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="นามสกุล"
-                    label-for="flastname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="lastname"
-                    >
-                      <b-form-input
-                        id="lastname"
-                        placeholder=""
-                        v-model="item.lastname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="โทรศัพท์"
-                    label-for="tel"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="tel"
-                      rules="required"
-                    >
-                      <b-form-input
-                        id="tel"
-                        placeholder=""
-                        v-model="item.tel"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ประเภทผู้ใช้งาน/User Type:"
-                    label-for="type"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="type"
+                      name="project_type_id"
                       rules="required"
                     >
                       <v-select
-                        input-id="type"
+                        input-id="project_type_id"
                         label="title"
-                        v-model="item.type"
+                        v-model="item.project_type_id"
                         :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.types"
+                        :options="selectOptions.project_types"
                         placeholder=""
                         :clearable="false"
                       />
@@ -838,21 +726,36 @@ export default {
                 </div>
 
                 <div class="row">
+                  <b-form-group label="รหัส" label-for="code" class="col-md">
+                    <validation-provider #default="{ errors }" name="code">
+                      <b-form-input
+                        id="code"
+                        placeholder=""
+                        v-model="item.code"
+                        :state="errors.length > 0 ? false : null"
+                      />
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                  </b-form-group>
+                </div>
+
+                <div class="row">
                   <b-form-group
-                    label="ประเภทตัดสิน/Project Type:"
-                    label-for="project_type_id"
+                    label="สถานศึกษา"
+                    label-for="university_id"
                     class="col-md"
                   >
                     <validation-provider
                       #default="{ errors }"
-                      name="project_type_id"
+                      name="university_id"
+                      rules="required"
                     >
                       <v-select
-                        input-id="project_type_id"
+                        input-id="university_id"
                         label="title"
-                        v-model="item.project_type_id"
+                        v-model="item.university_id"
                         :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.project_types"
+                        :options="selectOptions.universities"
                         placeholder=""
                         :clearable="false"
                       />

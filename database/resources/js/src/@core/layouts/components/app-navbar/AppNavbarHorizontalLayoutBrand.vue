@@ -8,8 +8,8 @@
           </span>
           <h2 class="brand-text mb-0">
             <!-- {{ appName }} -->
-            คณะวิทยาศาสตร์ประยุกต์<br />
-            <span class="sub-brand-text">มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</span
+            เครือข่ายสถาบันการศึกษาอุดมศึกษา<br />
+            <span class="sub-brand-text">ภาคกลางตอนบน</span
             >
           </h2>
         </b-link>

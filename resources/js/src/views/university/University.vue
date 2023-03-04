@@ -33,7 +33,7 @@ import {
   computed,
 } from "@vue/composition-api";
 import store from "@/store";
-import userStoreModule from "./userStoreModule";
+import universityStoreModule from "./universityStoreModule";
 import { useToast } from "vue-toastification/composition";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";
 import Swal from "sweetalert2";
@@ -67,11 +67,11 @@ export default {
     required,
   },
   setup() {
-    const USER_APP_STORE_MODULE_NAME = "user-list";
+    const UNIVERSITY_APP_STORE_MODULE_NAME = "university-list";
 
     // Register module
-    if (!store.hasModule(USER_APP_STORE_MODULE_NAME))
-      store.registerModule(USER_APP_STORE_MODULE_NAME, userStoreModule);
+    if (!store.hasModule(UNIVERSITY_APP_STORE_MODULE_NAME))
+      store.registerModule(UNIVERSITY_APP_STORE_MODULE_NAME, universityStoreModule);
 
     onUnmounted(() => {});
 
@@ -103,10 +103,10 @@ export default {
     const totalPage = ref(1);
     const totalItems = ref(0);
     const orderBy = ref({
-      title: "ชื่อ",
-      code: "firstname",
+      title: "สถานศึกษา",
+      code: "name",
     });
-    const order = ref({ title: "DESC", code: "desc" });
+    const order = ref({ title: "ASC", code: "asc" });
 
     const fields = reactive([
       {
@@ -115,45 +115,15 @@ export default {
         visible: false,
       },
       {
-        key: "firstname",
-        label: "ชื่อ",
+        key: "name",
+        label: "สถานศึกษา",
         sortable: true,
         visible: true,
-        class: "text-center",
         tdClass: "mw-3-5",
-      },
-      {
-        key: "username",
-        label: "username",
-        sortable: true,
-        visible: true,
-        class: "text-center",
-        tdClass: "mw-3-5",
-      },
-      {
-        key: "tel",
-        label: "โทรศัพท์",
-        sortable: true,
-        visible: true,
-        class: "text-center",
-      },
-      {
-        key: "project_type_name",
-        label: "ประเภทตัดสิน",
-        sortable: true,
-        visible: true,
-        class: "text-center",
-      },
-      {
-        key: "type",
-        label: "ประเภทผู้ใช้งาน",
-        sortable: true,
-        visible: true,
-        class: "text-center",
       },
       {
         key: "action",
-        label: "Action",
+        label: "จัดการ",
         visible: true,
         class: "text-center",
         tdClass: "mw-8",
@@ -162,104 +132,31 @@ export default {
 
     const visibleFields = computed(() => fields.filter((f) => f.visible));
 
-    const advancedSearch = reactive({
-      fullname: "",
-      firstname: "",
-      lastname: "",
-      username: "",
-      project_type_id: null,
-      type: null,
-    });
-
-    const resetAdvancedSearch = () => {
-      advancedSearch.fullname = "";
-      advancedSearch.firstname = "";
-      advancedSearch.lastname = "";
-      advancedSearch.username = "";
-      advancedSearch.project_type_id = null;
-      advancedSearch.type = null;
-    };
-
     const item = ref({
-      username: "",
-      email: "",
-      type: "",
+      name: "",
     });
 
     const selectOptions = ref({
       perPage: [
-        { title: "20", code: 20 },
         { title: "50", code: 50 },
       ],
       orderBy: [
-        { title: "ชื่อ", code: "firstname" },
-        { title: "username", code: "username" },
-        { title: "ประเภทตัดสิน", code: "project_type_name" },
-        { title: "ประเภทผู้ใช้", code: "type" },
+        { title: "สถานศึกษา", code: "name" },
       ],
       order: [
         { title: "ASC", code: "asc" },
         { title: "DESC", code: "desc" },
       ],
-      status: [
-        { title: "อนุมัติ", code: 2 },
-        { title: "บล็อก", code: 3 },
-      ],
-      types: [
-        { title: "Admin", code: "admin" },
-        { title: "Staff", code: "staff" },
-        { title: "Referee", code: "referee" },
-        { title: "User", code: "user" },
-      ],
-      project_types: [],
     });
-
-    store
-      .dispatch("user-list/fetchProjectTypes")
-      .then((response) => {
-        const { data } = response.data;
-        selectOptions.value.project_types = data.map((d) => {
-          return {
-            code: d.id,
-            title: d.name,
-          };
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        toast({
-          component: ToastificationContent,
-          props: {
-            title: "Error fetching Project Types's list",
-            icon: "AlertTriangleIcon",
-            variant: "danger",
-          },
-        });
-      });
 
     const fetchItems = () => {
       isOverLay.value = true;
-
-      let search = { ...advancedSearch };
-      if (search.project_type_id) {
-        if (search.project_type_id.hasOwnProperty("code")) {
-          search.project_type_id = search.project_type_id.code;
-        }
-      }
-
-      if (search.type) {
-        if (search.type.hasOwnProperty("code")) {
-          search.type = search.type.code;
-        }
-      }
-
       store
-        .dispatch("user-list/fetchUsers", {
+        .dispatch("university-list/fetchUniversities", {
           perPage: perPage.value.code,
           currentPage: currentPage.value == 0 ? undefined : currentPage.value,
           orderBy: orderBy.value.code,
           order: order.value.code,
-          ...search,
         })
         .then((response) => {
           items.value = response.data.data;
@@ -272,7 +169,7 @@ export default {
           toast({
             component: ToastificationContent,
             props: {
-              title: "Error fetching User's list",
+              title: "Error fetching Universitie's list",
               icon: "AlertTriangleIcon",
               variant: "danger",
             },
@@ -322,13 +219,13 @@ export default {
 
     const onDelete = (id) => {
       store
-        .dispatch("user-list/deleteUser", { id: id })
+        .dispatch("university-list/deleteUniversity", { id: id })
         .then((response) => {
           if (response.data.message == "success") {
             toast({
               component: ToastificationContent,
               props: {
-                title: "Success : Deleted User",
+                title: "Success : Deleted University",
                 icon: "CheckIcon",
                 variant: "success",
               },
@@ -350,31 +247,17 @@ export default {
     const handleEditClick = (data) => {
       item.value = data;
 
-      item.value.type = selectOptions.value.types.find((t) => {
-        return t.code == data.type;
-      });
-
-      item.value.project_type_id = selectOptions.value.project_types.find(
-        (t) => {
-          return t.code == data.project_type_id;
-        }
-      );
-
+      // item.value.type = selectOptions.value.type.find((t) => {
+      //   return t.code == data.type;
+      // });
       isAdd.value = false;
       isModal.value = true;
     };
 
     const handleAddClick = () => {
       item.value = {
-        username: "",
-        email: "",
-        prefix: "",
-        firstname: "",
-        lastname: "",
-        tel: "",
-        project_type_id: null,
-        type: null,
-        // status: 1
+        name: "",
+        is_publish: 1,
       };
       isAdd.value = true;
       isModal.value = true;
@@ -396,19 +279,13 @@ export default {
       isSubmit.value = true;
 
       let dataSend = {
-        email: item.value.username,
-        prefix: item.value.prefix,
-        firstname: item.value.firstname,
-        lastname: item.value.lastname,
-        type: item.value.type.code,
-        status: 2,
-        tel: item.value.tel,
-        project_type_id: item.value.project_type_id.code,
+        name: item.value.name,
+        is_publish: item.value.is_publish,
       };
 
       if (item.value.id == null) {
         store
-          .dispatch("user-list/addUser", dataSend)
+          .dispatch("university-list/addUniversity", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -420,7 +297,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Added User",
+                  title: "Success : Added University",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -435,14 +312,14 @@ export default {
             isSubmit.value = false;
             isOverLay.value = false;
 
-            errorToast("Add User Error");
+            errorToast("Add University Error");
           });
       } else {
         // Update
         dataSend["id"] = item.value.id;
 
         store
-          .dispatch("user-list/editUser", dataSend)
+          .dispatch("university-list/editUniversity", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -454,7 +331,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Updated User",
+                  title: "Success : Updated University",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -469,14 +346,12 @@ export default {
           .catch(() => {
             isSubmit.value = false;
             isOverLay.value = false;
-            errorToast("Update User Error");
+            errorToast("Update University Error");
           });
       }
     };
 
     return {
-      advancedSearch,
-      resetAdvancedSearch,
       items,
       item,
       isOverLay,
@@ -508,73 +383,6 @@ export default {
 
 <template>
   <div class="container-lg">
-    <!-- Search -->
-    <b-card>
-      <div class="m-2">
-        <b-row>
-          <b-col>
-            <h4>ค้นหา/Search</h4>
-            <hr />
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-form-group label="ชื่อ-นามสกุล" label-for="Name" class="col-md-6">
-            <b-form-input
-              id="fullname"
-              v-model="advancedSearch.fullname"
-              placeholder="ชื่อ-นามสกุล..."
-            />
-          </b-form-group>
-
-          <b-form-group label="Username" label-for="Username" class="col-md-6">
-            <b-form-input
-              id="username"
-              v-model="advancedSearch.username"
-              placeholder="Username..."
-            />
-          </b-form-group>
-
-          <b-form-group
-            label="ประเภทตัดสิน"
-            label-for="project_type_id"
-            class="col-md-6"
-          >
-            <v-select
-              v-model="advancedSearch.project_type_id"
-              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-              label="title"
-              :clearable="true"
-              placeholder="-- All Project Type --"
-              :options="selectOptions.project_types"
-            />
-          </b-form-group>
-
-          <b-form-group
-            label="ประเภทผู้ใช้"
-            label-for="type"
-            class="col-md-6"
-          >
-            <v-select
-              v-model="advancedSearch.type"
-              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-              label="title"
-              :clearable="true"
-              placeholder="-- All Type --"
-              :options="selectOptions.types"
-            />
-          </b-form-group>
-        </b-row>
-
-        <b-row>
-          <b-col>
-            <b-button variant="outline-danger" @click="resetAdvancedSearch()">
-              Clear
-            </b-button>
-          </b-col>
-        </b-row>
-      </div>
-    </b-card>
-
     <b-card no-body>
       <b-overlay :show="isOverLay" opacity="0.3" spinner-variant="primary">
         <div class="m-2">
@@ -634,14 +442,6 @@ export default {
                 :items="items"
                 :fields="visibleFields"
               >
-                <template #cell(firstname)="row">
-                  {{
-                    row.item.prefix +
-                    row.item.firstname +
-                    " " +
-                    row.item.lastname
-                  }}
-                </template>
                 <template #cell(action)="row">
                   <b-button
                     variant="outline-success"
@@ -707,19 +507,19 @@ export default {
               <b-form>
                 <div class="row">
                   <b-form-group
-                    label="Username"
-                    label-for="username"
+                    label="ชื่อสถานศึกษา"
+                    label-for="name"
                     class="col-md"
                   >
                     <validation-provider
                       #default="{ errors }"
-                      name="username"
+                      name="name"
                       rules="required"
                     >
                       <b-form-input
-                        id="username"
+                        id="name"
                         placeholder=""
-                        v-model="item.username"
+                        v-model="item.name"
                         :state="errors.length > 0 ? false : null"
                       />
                       <small class="text-danger">{{ errors[0] }}</small>
@@ -727,139 +527,6 @@ export default {
                   </b-form-group>
                 </div>
 
-                <div class="row">
-                  <b-form-group
-                    label="คำนำหน้า"
-                    label-for="prefix"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="prefix"
-                    >
-                      <b-form-input
-                        id="prefix"
-                        placeholder=""
-                        v-model="item.prefix"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ชื่อ"
-                    label-for="firstname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="firstname"
-                    >
-                      <b-form-input
-                        id="firstname"
-                        placeholder=""
-                        v-model="item.firstname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="นามสกุล"
-                    label-for="flastname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="lastname"
-                    >
-                      <b-form-input
-                        id="lastname"
-                        placeholder=""
-                        v-model="item.lastname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="โทรศัพท์"
-                    label-for="tel"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="tel"
-                      rules="required"
-                    >
-                      <b-form-input
-                        id="tel"
-                        placeholder=""
-                        v-model="item.tel"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ประเภทผู้ใช้งาน/User Type:"
-                    label-for="type"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="type"
-                      rules="required"
-                    >
-                      <v-select
-                        input-id="type"
-                        label="title"
-                        v-model="item.type"
-                        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.types"
-                        placeholder=""
-                        :clearable="false"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ประเภทตัดสิน/Project Type:"
-                    label-for="project_type_id"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="project_type_id"
-                    >
-                      <v-select
-                        input-id="project_type_id"
-                        label="title"
-                        v-model="item.project_type_id"
-                        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.project_types"
-                        placeholder=""
-                        :clearable="false"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
               </b-form>
             </validation-observer>
           </b-overlay>

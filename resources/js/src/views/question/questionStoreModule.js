@@ -4,26 +4,26 @@ export default {
   namespaced: true,
   getters: {},
   actions: {
-    fetchUsers(ctx, queryParams) {
+    fetchQuestions(ctx, queryParams) {
       return new Promise((resolve, reject) => {
         axios
-          .get("/user", { params: queryParams })
+          .get("/question", { params: queryParams })
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    fetchUser(ctx, { id }) {
+    fetchQuestion(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/user/${id}`)
+          .get(`/question/${id}`)
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    addUser(ctx, dataSend) {
+    addQuestion(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .post("/user", dataSend)
+          .post("/question", dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -31,10 +31,10 @@ export default {
       });
     },
 
-    editUser(ctx, dataSend) {
+    editQuestion(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .put(`/user/${dataSend.id}`, dataSend)
+          .put(`/question/${dataSend.id}`, dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -42,16 +42,17 @@ export default {
       });
     },
 
-    deleteUser(ctx, { id }) {
+    deleteQuestion(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .delete(`/user/${id}`)
+          .delete(`/question/${id}`)
           .then((response) => {
             return resolve(response);
           })
           .catch((error) => reject(error));
       });
     },
+
     fetchProjectTypes(ctx, queryParams) {
       return new Promise((resolve, reject) => {
         axios

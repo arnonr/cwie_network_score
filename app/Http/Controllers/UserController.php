@@ -18,31 +18,23 @@ class UserController extends Controller
     {
         // User DB
         $userDB = User::select(
-                'users.id as id',
-                'users.email as email',
-                'users.username as username',
-                'users.prefix as prefix',
-                'users.firstname as firstname',
-                'users.lastname as lastname',
-                'users.type as type',
-                'users.avatar as avatar',
-                'users.status as status',
-                'department.id as departmentID',
-                'department.name as departmentName',
+                'user.id as id',
+                'user.email as email',
+                'user.username as username',
+                'user.prefix as prefix',
+                'user.firstname as firstname',
+                'user.lastname as lastname',
+                'user.type as type',
+                'user.avatar as avatar',
+                'user.status as status',
+                'user.tel as tel',
+                'user.project_type_id as project_type_id',
+                'project_type.name as project_type_name'
             )
-            ->where('users.id', $id)
+            ->leftJoin('project_type','project_type.id','=','user.project_type_id')
+            ->where('user.id', $id)
             ->first();
 
-        $data = [
-            'userID' => $userDB->id,
-            'email' => $userDB->email ? $userDB->email : '',
-            'prefix' => $userDB->prefix ? $userDB->prefix : '',
-            'firstname' => $userDB->firstname,
-            'lastname' => $userDB->lastname,
-            'type' => $userDB->type,
-            'status' => $userDB->status,
-            'avatar' =>  $userDB->avatar ? $userDB->avatar : '',
-        ];
         
         $tokenResult = $userDB->createToken('Personal Access Token');
         $token = $tokenResult->token;
@@ -100,17 +92,23 @@ class UserController extends Controller
 
         }
 
+
         $userData = [
             'userID' => $userDB->id,
-            'email' => $userDB->email,
+            'email' => $userDB->email ? $userDB->email : '',
             'username' => $userDB->username,
-            'fullName' => $userDB->firstname.' '.$userDB->lastname,
-            'avatar' => $userDB->avatar,
+            'prefix' => $userDB->prefix ? $userDB->prefix : '',
+            'firstname' => $userDB->firstname,
+            'lastname' => $userDB->lastname,
             'type' => $userDB->type,
             'status' => $userDB->status,
-            'department' => ['id' => $userDB->departmentID,'name' => $userDB->departmentName],
-            'role' => $role,
+            'avatar' =>  $userDB->avatar ? $userDB->avatar : '',
+            'tel' => $userDB->tel,
+            'project_type_id' => $userDB->project_type_id,
+            'project_type_name' => $userDB->project_type_name ? $userDB->project_type_name : '',
+            'fullName' => $userDB->firstname.' '.$userDB->lastname,
             'ability' => $ability,
+            'role' => $role,
         ];
 
         return response()->json([
@@ -131,17 +129,50 @@ class UserController extends Controller
         $items = User::select(
             'user.id as id',
             'user.username as username',
+            'user.prefix as prefix',
             'user.firstname as firstname',
             'user.lastname as lastname',
             'user.email as email',
             'user.type as type',
             'user.status as status',
+            'user.tel as tel',
+            'user.project_type_id as project_type_id',
+            'project_type.name as project_type_name'
         )
+        ->leftJoin('project_type','project_type.id','=','user.project_type_id')
         ->where('user.deleted_at', null);
 
         if ($request->id) {
             $items->where('user.id', $request->id);
         }
+
+        if ($request->username) {
+            $items->where('user.username','LIKE',"%". $request->username."%");
+        }
+        if ($request->firstname) {
+            $items->where('user.firstname', 'LIKE',"%". $request->firstname."%");
+        }
+        if ($request->lastname) {
+            $items->where('user.lastname',  'LIKE',"%". $request->lastname."%");
+        }
+
+        if ($request->fullname) {
+            $items->whereRaw("concat(prefix,firstname, ' ', lastname) like '%" .$request->fullname. "%' ");
+        }
+
+        if ($request->email) {
+            $items->where('user.email','LIKE',"%".  $request->email."%");
+        }
+        if ($request->type) {
+            $items->where('user.type', $request->type);
+        }
+        if ($request->project_type_id) {
+            $items->where('user.project_type_id', $request->project_type_id);
+        }
+        if ($request->status) {
+            $items->where('user.status', $request->status);
+        }
+
 
         if($request->orderBy){
             $items = $items->orderBy($request->orderBy, $request->order);
@@ -176,9 +207,17 @@ class UserController extends Controller
         ]);
 
         $data = new User;
-        $data->username = $request->username;
+        $data->username = $request->email;
+        $data->prefix = $request->prefix;
+        $data->firstname = $request->firstname;
+        $data->lastname = $request->lastname;
         $data->email = $request->email;
         $data->type = $request->type;
+        $data->status = $request->status;
+        $data->tel = $request->tel;
+        $data->password = bcrypt($request->tel);
+        $data->project_type_id = $request->project_type_id;
+
         $data->save();
 
         $responseData = [
@@ -199,8 +238,17 @@ class UserController extends Controller
 
         $data = User::where('id',$id)->first();
 
+        $data->username = $request->email;
+        $data->prefix = $request->prefix;
+        $data->firstname = $request->firstname;
+        $data->lastname = $request->lastname;
         $data->email = $request->email;
         $data->type = $request->type;
+        $data->status = $request->status;
+        $data->tel = $request->tel;
+        $data->project_type_id = $request->project_type_id;
+
+        $data->password = bcrypt($request->tel);
         $data->save();
 
         $responseData = [

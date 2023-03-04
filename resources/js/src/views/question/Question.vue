@@ -16,6 +16,7 @@ import {
   BTable,
   BForm,
   BModal,
+  BFormTextarea,
 } from "bootstrap-vue";
 import vSelect from "vue-select";
 
@@ -33,13 +34,14 @@ import {
   computed,
 } from "@vue/composition-api";
 import store from "@/store";
-import userStoreModule from "./userStoreModule";
+import questionStoreModule from "./questionStoreModule";
 import { useToast } from "vue-toastification/composition";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";
 import Swal from "sweetalert2";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import { required } from "@validations";
 import { getUserData } from "@/auth/utils";
+import { INSPECT_MAX_BYTES } from "buffer";
 
 export default {
   components: {
@@ -65,13 +67,14 @@ export default {
     ValidationProvider,
     ValidationObserver,
     required,
+    BFormTextarea,
   },
   setup() {
-    const USER_APP_STORE_MODULE_NAME = "user-list";
+    const QUESTION_APP_STORE_MODULE_NAME = "question-list";
 
     // Register module
-    if (!store.hasModule(USER_APP_STORE_MODULE_NAME))
-      store.registerModule(USER_APP_STORE_MODULE_NAME, userStoreModule);
+    if (!store.hasModule(QUESTION_APP_STORE_MODULE_NAME))
+      store.registerModule(QUESTION_APP_STORE_MODULE_NAME, questionStoreModule);
 
     onUnmounted(() => {});
 
@@ -102,11 +105,21 @@ export default {
     const currentPage = ref(1);
     const totalPage = ref(1);
     const totalItems = ref(0);
-    const orderBy = ref({
-      title: "ชื่อ",
-      code: "firstname",
-    });
-    const order = ref({ title: "DESC", code: "desc" });
+    const orderBy = ref(
+      {
+        title: "ประเภทการประกวด",
+        code: "project_type_name",
+      },
+      {
+        title: "คำถาม",
+        code: "name",
+      },
+      {
+        title: "ลำดับ",
+        code: "level",
+      }
+    );
+    const order = ref({ title: "ASC", code: "asc" });
 
     const fields = reactive([
       {
@@ -115,107 +128,74 @@ export default {
         visible: false,
       },
       {
-        key: "firstname",
-        label: "ชื่อ",
+        key: "name",
+        label: "คำถาม",
         sortable: true,
         visible: true,
-        class: "text-center",
-        tdClass: "mw-3-5",
-      },
-      {
-        key: "username",
-        label: "username",
-        sortable: true,
-        visible: true,
-        class: "text-center",
-        tdClass: "mw-3-5",
-      },
-      {
-        key: "tel",
-        label: "โทรศัพท์",
-        sortable: true,
-        visible: true,
-        class: "text-center",
       },
       {
         key: "project_type_name",
-        label: "ประเภทตัดสิน",
+        label: "ประเภทการประกวด",
+        sortable: true,
+        visible: true,
+        thStyle: {
+          width: "400px",
+        },
+      },
+      {
+        key: "level",
+        label: "ลำดับ",
         sortable: true,
         visible: true,
         class: "text-center",
       },
       {
-        key: "type",
-        label: "ประเภทผู้ใช้งาน",
+        key: "total_score",
+        label: "คะแนนเต็ม",
         sortable: true,
         visible: true,
         class: "text-center",
       },
       {
         key: "action",
-        label: "Action",
+        label: "จัดการ",
         visible: true,
         class: "text-center",
-        tdClass: "mw-8",
       },
     ]);
 
     const visibleFields = computed(() => fields.filter((f) => f.visible));
 
     const advancedSearch = reactive({
-      fullname: "",
-      firstname: "",
-      lastname: "",
-      username: "",
+      name: "",
       project_type_id: null,
-      type: null,
     });
 
     const resetAdvancedSearch = () => {
-      advancedSearch.fullname = "";
-      advancedSearch.firstname = "";
-      advancedSearch.lastname = "";
-      advancedSearch.username = "";
+      advancedSearch.name = "";
       advancedSearch.project_type_id = null;
-      advancedSearch.type = null;
     };
 
     const item = ref({
-      username: "",
-      email: "",
-      type: "",
+      name: "",
     });
 
     const selectOptions = ref({
-      perPage: [
-        { title: "20", code: 20 },
-        { title: "50", code: 50 },
-      ],
+      perPage: [{ title: "50", code: 50 }],
       orderBy: [
-        { title: "ชื่อ", code: "firstname" },
-        { title: "username", code: "username" },
-        { title: "ประเภทตัดสิน", code: "project_type_name" },
-        { title: "ประเภทผู้ใช้", code: "type" },
+        { title: "ประเภทการประกวด", code: "project_type_name" },
+        { title: "คำถาม", code: "name" },
+        { title: "ลำดับ", code: "level" },
       ],
       order: [
         { title: "ASC", code: "asc" },
         { title: "DESC", code: "desc" },
       ],
-      status: [
-        { title: "อนุมัติ", code: 2 },
-        { title: "บล็อก", code: 3 },
-      ],
-      types: [
-        { title: "Admin", code: "admin" },
-        { title: "Staff", code: "staff" },
-        { title: "Referee", code: "referee" },
-        { title: "User", code: "user" },
-      ],
       project_types: [],
     });
 
     store
-      .dispatch("user-list/fetchProjectTypes")
+      .dispatch("question-list/fetchProjectTypes")
       .then((response) => {
         const { data } = response.data;
         selectOptions.value.project_types = data.map((d) => {
@@ -247,14 +227,8 @@ export default {
         }
       }
 
-      if (search.type) {
-        if (search.type.hasOwnProperty("code")) {
-          search.type = search.type.code;
-        }
-      }
-
       store
-        .dispatch("user-list/fetchUsers", {
+        .dispatch("question-list/fetchQuestions", {
           perPage: perPage.value.code,
           currentPage: currentPage.value == 0 ? undefined : currentPage.value,
           orderBy: orderBy.value.code,
@@ -272,7 +246,7 @@ export default {
           toast({
             component: ToastificationContent,
             props: {
-              title: "Error fetching User's list",
+              title: "Error fetching Question's list",
               icon: "AlertTriangleIcon",
               variant: "danger",
             },
@@ -322,13 +296,13 @@ export default {
 
     const onDelete = (id) => {
       store
-        .dispatch("user-list/deleteUser", { id: id })
+        .dispatch("question-list/deleteQuestion", { id: id })
         .then((response) => {
           if (response.data.message == "success") {
             toast({
               component: ToastificationContent,
               props: {
-                title: "Success : Deleted User",
+                title: "Success : Deleted Question",
                 icon: "CheckIcon",
                 variant: "success",
               },
@@ -349,16 +323,20 @@ export default {
 
     const handleEditClick = (data) => {
       item.value = data;
-
-      item.value.type = selectOptions.value.types.find((t) => {
-        return t.code == data.type;
-      });
-
-      item.value.project_type_id = selectOptions.value.project_types.find(
-        (t) => {
-          return t.code == data.project_type_id;
-        }
-      );
+      item.value.project_type_id = {
+        title: data.project_type_name,
+        code: data.project_type_id,
+      };
+      item.value.is_check =
+        data.is_check == 1
+          ? {
+              title: "YES",
+              code: data.is_check,
+            }
+          : {
+              title: "NO",
+              code: data.is_check,
+            };
 
       isAdd.value = false;
       isModal.value = true;
@@ -366,15 +344,13 @@ export default {
 
     const handleAddClick = () => {
       item.value = {
-        username: "",
-        email: "",
-        prefix: "",
-        firstname: "",
-        lastname: "",
-        tel: "",
+        name: "",
         project_type_id: null,
-        type: null,
-        // status: 1
+        level: "",
+        detail: "",
+        total_score: "",
+        is_check: { title: "NO", code: 0 },
+        is_publish: 1,
       };
       isAdd.value = true;
       isModal.value = true;
@@ -389,6 +365,10 @@ export default {
       });
     };
 
+    watchEffect(() => {
+      fetchItems();
+    });
+
     const onSubmit = () => {
       // Prevent modal from closing
 
@@ -396,19 +376,18 @@ export default {
       isSubmit.value = true;
 
       let dataSend = {
-        email: item.value.username,
-        prefix: item.value.prefix,
-        firstname: item.value.firstname,
-        lastname: item.value.lastname,
-        type: item.value.type.code,
-        status: 2,
-        tel: item.value.tel,
+        name: item.value.name,
+        level: item.value.level,
         project_type_id: item.value.project_type_id.code,
+        is_check: item.value.is_check.code,
+        total_score: item.value.total_score,
+        detail: item.value.detail,
+        is_publish: item.value.is_publish,
       };
 
       if (item.value.id == null) {
         store
-          .dispatch("user-list/addUser", dataSend)
+          .dispatch("question-list/addQuestion", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -420,7 +399,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Added User",
+                  title: "Success : Added Question",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -435,14 +414,14 @@ export default {
             isSubmit.value = false;
             isOverLay.value = false;
 
-            errorToast("Add User Error");
+            errorToast("Add Question Error");
           });
       } else {
         // Update
         dataSend["id"] = item.value.id;
 
         store
-          .dispatch("user-list/editUser", dataSend)
+          .dispatch("question-list/editQuestion", dataSend)
           .then(async (response) => {
             if (response.data.message == "success") {
               fetchItems();
@@ -454,7 +433,7 @@ export default {
               toast({
                 component: ToastificationContent,
                 props: {
-                  title: "Success : Updated User",
+                  title: "Success : Updated Question",
                   icon: "CheckIcon",
                   variant: "success",
                 },
@@ -469,7 +448,7 @@ export default {
           .catch(() => {
             isSubmit.value = false;
             isOverLay.value = false;
-            errorToast("Update User Error");
+            errorToast("Update Question Error");
           });
       }
     };
@@ -518,24 +497,16 @@ export default {
           </b-col>
         </b-row>
         <b-row>
-          <b-form-group label="ชื่อ-นามสกุล" label-for="Name" class="col-md-6">
+          <b-form-group label="คำถาม" label-for="Name" class="col-md-6">
             <b-form-input
-              id="fullname"
-              v-model="advancedSearch.fullname"
-              placeholder="ชื่อ-นามสกุล..."
-            />
-          </b-form-group>
-
-          <b-form-group label="Username" label-for="Username" class="col-md-6">
-            <b-form-input
-              id="username"
-              v-model="advancedSearch.username"
-              placeholder="Username..."
+              id="name"
+              v-model="advancedSearch.name"
+              placeholder="คำถาม..."
             />
           </b-form-group>
 
           <b-form-group
-            label="ประเภทตัดสิน"
+            label="ประเภทการประกวด"
             label-for="project_type_id"
             class="col-md-6"
           >
@@ -546,21 +517,6 @@ export default {
               :clearable="true"
               placeholder="-- All Project Type --"
               :options="selectOptions.project_types"
-            />
-          </b-form-group>
-
-          <b-form-group
-            label="ประเภทผู้ใช้"
-            label-for="type"
-            class="col-md-6"
-          >
-            <v-select
-              v-model="advancedSearch.type"
-              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-              label="title"
-              :clearable="true"
-              placeholder="-- All Type --"
-              :options="selectOptions.types"
             />
           </b-form-group>
         </b-row>
@@ -574,7 +530,7 @@ export default {
         </b-row>
       </div>
     </b-card>
-
+    <!--  -->
     <b-card no-body>
       <b-overlay :show="isOverLay" opacity="0.3" spinner-variant="primary">
         <div class="m-2">
@@ -634,14 +590,6 @@ export default {
                 :items="items"
                 :fields="visibleFields"
               >
-                <template #cell(firstname)="row">
-                  {{
-                    row.item.prefix +
-                    row.item.firstname +
-                    " " +
-                    row.item.lastname
-                  }}
-                </template>
                 <template #cell(action)="row">
                   <b-button
                     variant="outline-success"
@@ -691,7 +639,7 @@ export default {
           cancel-title="Close"
           centered
           size="lg"
-          title="User Form"
+          title="Form"
           :visible="isModal"
           @ok="validationForm"
           :ok-disabled="isSubmit"
@@ -707,128 +655,21 @@ export default {
               <b-form>
                 <div class="row">
                   <b-form-group
-                    label="Username"
-                    label-for="username"
+                    label="ประเภทการประกวด"
+                    label-for="project_type_id"
                     class="col-md"
                   >
                     <validation-provider
                       #default="{ errors }"
-                      name="username"
-                      rules="required"
-                    >
-                      <b-form-input
-                        id="username"
-                        placeholder=""
-                        v-model="item.username"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="คำนำหน้า"
-                    label-for="prefix"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="prefix"
-                    >
-                      <b-form-input
-                        id="prefix"
-                        placeholder=""
-                        v-model="item.prefix"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ชื่อ"
-                    label-for="firstname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="firstname"
-                    >
-                      <b-form-input
-                        id="firstname"
-                        placeholder=""
-                        v-model="item.firstname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="นามสกุล"
-                    label-for="flastname"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="lastname"
-                    >
-                      <b-form-input
-                        id="lastname"
-                        placeholder=""
-                        v-model="item.lastname"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="โทรศัพท์"
-                    label-for="tel"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="tel"
-                      rules="required"
-                    >
-                      <b-form-input
-                        id="tel"
-                        placeholder=""
-                        v-model="item.tel"
-                        :state="errors.length > 0 ? false : null"
-                      />
-                      <small class="text-danger">{{ errors[0] }}</small>
-                    </validation-provider>
-                  </b-form-group>
-                </div>
-
-                <div class="row">
-                  <b-form-group
-                    label="ประเภทผู้ใช้งาน/User Type:"
-                    label-for="type"
-                    class="col-md"
-                  >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="type"
+                      name="project_type_id"
                       rules="required"
                     >
                       <v-select
-                        input-id="type"
+                        input-id="project_type_id"
                         label="title"
-                        v-model="item.type"
+                        v-model="item.project_type_id"
                         :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.types"
+                        :options="selectOptions.project_types"
                         placeholder=""
                         :clearable="false"
                       />
@@ -838,21 +679,99 @@ export default {
                 </div>
 
                 <div class="row">
+                  <b-form-group label="คำถาม" label-for="name" class="col-md">
+                    <validation-provider
+                      #default="{ errors }"
+                      name="name"
+                      rules="required"
+                    >
+                      <b-form-input
+                        id="name"
+                        placeholder=""
+                        v-model="item.name"
+                        :state="errors.length > 0 ? false : null"
+                      />
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                  </b-form-group>
+                </div>
+
+                <div class="row">
+                  <b-form-group label="ลำดับ" label-for="level" class="col-md">
+                    <validation-provider #default="{ errors }" name="level">
+                      <b-form-input
+                        id="level"
+                        placeholder=""
+                        v-model="item.level"
+                        :state="errors.length > 0 ? false : null"
+                      />
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                  </b-form-group>
+                </div>
+
+                <div class="row">
                   <b-form-group
-                    label="ประเภทตัดสิน/Project Type:"
-                    label-for="project_type_id"
+                    label="คำอธิบาย"
+                    label-for="detail"
+                    class="col-md"
+                  >
+                    <validation-provider #default="{ errors }" name="detail">
+                      <b-form-textarea
+                        id="detail"
+                        placeholder=""
+                        v-model="item.detail"
+                        :state="errors.length > 0 ? false : null"
+                      />
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                  </b-form-group>
+                </div>
+
+                <div class="row">
+                  <b-form-group
+                    label="คะแนนเต็ม"
+                    label-for="total_score"
                     class="col-md"
                   >
                     <validation-provider
                       #default="{ errors }"
-                      name="project_type_id"
+                      name="total_score"
+                    >
+                      <b-form-input
+                        id="total_score"
+                        placeholder=""
+                        v-model="item.total_score"
+                        :state="errors.length > 0 ? false : null"
+                      />
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                  </b-form-group>
+                </div>
+
+                <div class="row">
+                  <b-form-group
+                    label="เป็น Checkbox"
+                    label-for="is_check"
+                    class="col-md"
+                  >
+                    <validation-provider
+                      #default="{ errors }"
+                      name="is_check"
+                      rules="required"
                     >
                       <v-select
-                        input-id="project_type_id"
+                        input-id="is_check"
                         label="title"
-                        v-model="item.project_type_id"
+                        v-model="item.is_check"
                         :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                        :options="selectOptions.project_types"
+                        :options="[
+                          {
+                            title: 'YES',
+                            code: 1,
+                          },
+                          { title: 'NO', code: 0 },
+                        ]"
                         placeholder=""
                         :clearable="false"
                       />

@@ -38,6 +38,7 @@ class User extends Authenticatable
         'pid',
         'account_type',
         'type',
+        'project_type_id',
         'status',
         'email_person_id',
         'remember_token',

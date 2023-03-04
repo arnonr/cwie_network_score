@@ -29,10 +29,8 @@
               </span>
               <h2 class="brand-text brand-text-vertical">
                 <!-- {{ appName }} -->
-                คณะวิทยาศาสตร์ประยุกต์<br />
-                <span class="sub-brand-text sub-brand-text-vertical"
-                  >มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</span
-                >
+                เครือข่ายสถาบันการศึกษาอุดมศึกษา<br />
+                <span class="sub-brand-text">ภาคกลางตอนบน</span>
               </h2>
             </b-link>
           </li>

@@ -83,7 +83,7 @@ class FixController extends Controller
         }
 
         if ($request->is_publish != null) {
-            $items->where('mou.is_publish', $request->is_publish);
+            $items->where('fix.is_publish', $request->is_publish);
         }
 
         if ($request->fix_date) {

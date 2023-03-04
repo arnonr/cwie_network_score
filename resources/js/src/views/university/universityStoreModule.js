@@ -4,26 +4,26 @@ export default {
   namespaced: true,
   getters: {},
   actions: {
-    fetchUsers(ctx, queryParams) {
+    fetchUniversities(ctx, queryParams) {
       return new Promise((resolve, reject) => {
         axios
-          .get("/user", { params: queryParams })
+          .get("/university", { params: queryParams })
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    fetchUser(ctx, { id }) {
+    fetchUniversity(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/user/${id}`)
+          .get(`/university/${id}`)
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    addUser(ctx, dataSend) {
+    addUniversity(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .post("/user", dataSend)
+          .post("/university", dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -31,10 +31,10 @@ export default {
       });
     },
 
-    editUser(ctx, dataSend) {
+    editUniversity(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .put(`/user/${dataSend.id}`, dataSend)
+          .put(`/university/${dataSend.id}`, dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -42,21 +42,13 @@ export default {
       });
     },
 
-    deleteUser(ctx, { id }) {
+    deleteUniversity(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .delete(`/user/${id}`)
+          .delete(`/university/${id}`)
           .then((response) => {
             return resolve(response);
           })
-          .catch((error) => reject(error));
-      });
-    },
-    fetchProjectTypes(ctx, queryParams) {
-      return new Promise((resolve, reject) => {
-        axios
-          .get("/project-type", { params: queryParams })
-          .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },

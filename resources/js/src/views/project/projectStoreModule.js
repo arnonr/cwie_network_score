@@ -4,26 +4,26 @@ export default {
   namespaced: true,
   getters: {},
   actions: {
-    fetchUsers(ctx, queryParams) {
+    fetchProjects(ctx, queryParams) {
       return new Promise((resolve, reject) => {
         axios
-          .get("/user", { params: queryParams })
+          .get("/project", { params: queryParams })
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    fetchUser(ctx, { id }) {
+    fetchProject(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .get(`/user/${id}`)
+          .get(`/project/${id}`)
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });
     },
-    addUser(ctx, dataSend) {
+    addProject(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .post("/user", dataSend)
+          .post("/project", dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -31,10 +31,10 @@ export default {
       });
     },
 
-    editUser(ctx, dataSend) {
+    editProject(ctx, dataSend) {
       return new Promise((resolve, reject) => {
         axios
-          .put(`/user/${dataSend.id}`, dataSend)
+          .put(`/project/${dataSend.id}`, dataSend)
           .then((response) => {
             return resolve(response);
           })
@@ -42,20 +42,30 @@ export default {
       });
     },
 
-    deleteUser(ctx, { id }) {
+    deleteProject(ctx, { id }) {
       return new Promise((resolve, reject) => {
         axios
-          .delete(`/user/${id}`)
+          .delete(`/project/${id}`)
           .then((response) => {
             return resolve(response);
           })
           .catch((error) => reject(error));
       });
     },
+
     fetchProjectTypes(ctx, queryParams) {
       return new Promise((resolve, reject) => {
         axios
           .get("/project-type", { params: queryParams })
+          .then((response) => resolve(response))
+          .catch((error) => reject(error));
+      });
+    },
+
+    fetchUniversities(ctx, queryParams) {
+      return new Promise((resolve, reject) => {
+        axios
+          .get("/university", { params: queryParams })
           .then((response) => resolve(response))
           .catch((error) => reject(error));
       });

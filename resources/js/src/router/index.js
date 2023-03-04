@@ -13,6 +13,10 @@ import pages from "./routes/pages";
 import fixs from "./routes/fixs";
 import reports from "./routes/reports";
 import users from "./routes/users";
+import universities from "./routes/universities";
+import projectTypes from "./routes/project-types";
+import questions from "./routes/questions";
+import projects from "./routes/projects";
 Vue.use(VueRouter);
 
 const router = new VueRouter({
@@ -45,6 +49,10 @@ const router = new VueRouter({
     ...pages,
     ...reports,
     ...users,
+    ...universities,
+    ...projectTypes,
+    ...questions,
+    ...projects,
     {
       path: "*",
       redirect: "error-404",
