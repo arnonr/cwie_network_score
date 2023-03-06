@@ -689,7 +689,7 @@ export default {
                     title="ดูข้อมูล"
                     class="btn-icon btn-sm"
                     :href="
-                      'http://localhost:8113/storage/document/' +
+                      'http://143.198.208.110:8113/storage/document/' +
                       row.item.code +
                       '.pdf'
                     "
