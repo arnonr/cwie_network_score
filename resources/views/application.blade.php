@@ -8,7 +8,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico"> -->
 
-  <title>SERVICE</title>
+  <title>CWIE NETWORK</title>
 
   <!-- Splash Screen/Loader Styles -->
   <link rel="stylesheet" type="text/css" href="{{ asset(mix('css/loader.css')) }}" />
@@ -26,7 +26,7 @@
 
 <body>
   <noscript>
-    <strong>Service</strong>
+    <strong>CWIE NETWORK</strong>
   </noscript>
   <div id="loading-bg">
     <div class="loading-logo">
