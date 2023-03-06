@@ -17,6 +17,7 @@ import universities from "./routes/universities";
 import projectTypes from "./routes/project-types";
 import questions from "./routes/questions";
 import projects from "./routes/projects";
+import scores from "./routes/scores";
 Vue.use(VueRouter);
 
 const router = new VueRouter({
@@ -31,7 +32,7 @@ const router = new VueRouter({
       redirect: to => {
         // the function receives the target route as the argument
         // we return a redirect path/location here.
-        return { path: '/list'}
+        return { path: '/report'}
       },
       // name: "mou-list",
       // component: () => import("@/views/mou/MouList.vue"),
@@ -53,6 +54,7 @@ const router = new VueRouter({
     ...projectTypes,
     ...questions,
     ...projects,
+    ...scores,
     {
       path: "*",
       redirect: "error-404",

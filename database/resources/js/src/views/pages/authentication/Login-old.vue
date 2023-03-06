@@ -212,7 +212,7 @@
         password: "",
         username: "",
         sideImg: require("@/assets/images/pages/login-v2.svg"),
-        logoImg: require("@/assets/images/logo/logo-sci.png"),
+        logoImg: require("@/assets/images/logo/logo_web_1.jpeg"),
         // validation rules
         required,
         email,

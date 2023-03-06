@@ -5,7 +5,7 @@ export default [
       component: () => import("@/views/university/University.vue"),
       meta: {
         pageTitle: "จัดการสถานศึกษา",
-        resource: "AdminUser",
+        resource: "RefereeUser",
         action: "manage",
       },
     },

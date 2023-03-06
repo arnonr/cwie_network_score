@@ -13,20 +13,21 @@ class ScoreController extends Controller
     public function getAll(Request $request)
     {
         $data = Score::select(
-            'id as id',
-            'project_id as project_id',
-            'user_id as user_id',
-            'question_id as question_id',
-            'answer as answer',
-            'status as status',
-            'is_publish as is_publish',
-            'deleted_at as delete_at',
-            'created_at as created_at',
-            'created_by as created_by',
-            'updated_at as updated_at',
-            'updated_by as updated_by',
+            'score.id as id',
+            'score.project_id as project_id',
+            'score.user_id as user_id',
+            'score.question_id as question_id',
+            'score.answer as answer',
+            'score.status as status',
+            'score.is_publish as is_publish',
+            'score.deleted_at as delete_at',
+            'score.created_at as created_at',
+            'score.created_by as created_by',
+            'score.updated_at as updated_at',
+            'score.updated_by as updated_by',
         )
         ->where('deleted_at', null);
+        // ->join('user','score.user_id','=','user.id');
         
 
         if ($request->id) {
@@ -98,6 +99,16 @@ class ScoreController extends Controller
             'user_id as required',
             'question_id as required',
         ]);
+
+        $data = Score::where('project_id', $request->project_id)
+            ->where('question_id', $request->question_id)
+            ->where('user_id', $request->user_id)
+            ->delete();
+
+        // if($data){
+        //     $data->deleted_at = Carbon::now();
+        //     $data->save();
+        // }
 
         $data = new Score;
         $data->project_id = $request->project_id;

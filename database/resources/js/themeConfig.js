@@ -11,7 +11,8 @@ export const $themeConfig = {
   app: {
     appName: 'Service', // Will update name in navigation menu (Branding)
     // eslint-disable-next-line global-require
-    appLogoImage: require('@/assets/images/logo/logo-sci.png'), // Will update logo in navigation menu (Branding)
+    appLogoImage: require('@/assets/images/logo/logo_web_1.jpeg'),
+   // appLogoImage: require('@/assets/images/logo/logo-sci.png'), // Will update logo in navigation menu (Branding)
   },
   layout: {
     isRTL: false,

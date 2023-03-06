@@ -9,6 +9,7 @@ use App\Models\User;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -29,38 +30,20 @@ class AuthController extends Controller
             'password' => 'required|string',
             'remember_me' => 'boolean'
         ]);
-        
-        $icitAccount = $this->icitAccountApi($request->username, $request->password);
-        
-        if(($this->errorCode == self::ERROR_NONE) || ($request->password == '2023@MOU')){
-            
-            $credentials = [
-                'username' => $request->username,
-                'password' => $request->password,
-            ]; 
 
-            if((!Auth::attempt($credentials)) && ($request->password != '2023@MOU'))
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 200);
+        $userDB = User::where('username', $request->username)->first();
 
-            $userDB = User::select(
-                'user.id as id',
-                'user.email as email',
-                'user.username as username',
-                'user.firstname as firstname',
-                'user.lastname as lastname',
-                'user.name as name',
-                'user.type as type',
-                'user.avatar as avatar',
-                'user.status as status',
-            )
-            ->where('username', $request->username)
-            ->first();
+        $check = 0;
+        if($userDB){
+            $check = 1;
+            if (Hash::check($request->password, $userDB->password)){
+                $check = 2; 
+            }
+        }
+      
+        if($check == 2){
 
-            $user = $userDB;
-
-            $tokenResult = $user->createToken('Personal Access Token');
+            $tokenResult = $userDB->createToken('Personal Access Token');
             $token = $tokenResult->token;
             if ($request->remember_me)
             $token->expires_at = Carbon::now()->addWeeks(1);
@@ -77,22 +60,17 @@ class AuthController extends Controller
                 ]
             ];
 
-            if($userDB->status == 1){
-                $role = 'wating-approve-user';
-
-                array_push($ability, [
-                    'action' => 'manage',
-                    'subject'=> 'WatingApproveUser',
-                ]);
-            }else if($userDB->status == 2){
-
+            if($userDB->status == 2){
                 array_push($ability, [
                     'action' => 'manage',
                     'subject'=> 'User',
                 ]);
-
-                if($userDB->type == 'user'){
-                    $role = 'user';
+                if($userDB->type == 'referee'){
+                    $role = 'referee';
+                    array_push($ability, [
+                        'action' => 'manage',
+                        'subject'=> 'RefereeUser',
+                    ]);
                 }else if($userDB->type == 'staff'){
                     $role = 'staff';
                     array_push($ability, [
@@ -101,6 +79,10 @@ class AuthController extends Controller
                     ]);
                 }else if($userDB->type == 'admin'){
                     $role = 'admin';
+                    // array_push($ability, [
+                    //     'action' => 'manage',
+                    //     'subject'=> 'RefereeUser',
+                    // ]);
                     array_push($ability, [
                         'action' => 'manage',
                         'subject'=> 'StaffUser',
@@ -112,45 +94,44 @@ class AuthController extends Controller
                 }else{
 
                 }
-            }else if ($userDB->status == 3){
+            }else{
                 $role = 'block';
                 array_push($ability, [
                     'action' => 'manage',
                     'subject'=> 'BlockUser',
                 ]);
-            }else{
-
             }
 
-            $userData = [
-                'userID' => $userDB->id,
-                'email' => $userDB->email,
-                'username' => $userDB->username,
-                'fullName' => $userDB->firstname.' '.$userDB->lastname,
-                'avatar' => $userDB->avatar,
-                'type' => $userDB->type,
-                'status' => $userDB->status,
-                'department' => ['id' => $userDB->departmentID,'name' => $userDB->departmentName],
-                'role' => $role,
-                'ability' => $ability,
-            ];
-
-            return response()->json([
-                'message' => 'success',
-                'userData' => $userData,
-                'accessToken' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => Carbon::parse(
-                    $tokenResult->token->expires_at
-                )->toDateTimeString()
-            ], 200);
         }else{
             return response()->json([
-                'message' => $this->errorMessage,
-                'freedom' => 'test',
+                'message' => $check == 1 ? 'Password Not Match': 'Username Not Found',
+                'text' => bcrypt($request->password)
             ], 200);
         }
 
+
+        $user = [
+            'userID' => $userDB->id,
+            'email' => $userDB->email,
+            'username' => $userDB->username,
+            'fullName' =>  $userDB->prefix.''.$userDB->firstname.' '.$userDB->lastname,
+            'avatar' => $userDB->avatar,
+            'type' => $userDB->type,
+            'status' => $userDB->status,
+            'project_type_id' => $userDB->project_type_id,
+            'role' => $role,
+            'ability' => $ability,
+        ];
+
+        return response()->json([
+            'message' => 'success',
+            'userData' => $user,
+            'accessToken' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::parse(
+                $tokenResult->token->expires_at
+            )->toDateTimeString()
+        ], 200);
     }
 
     public function icitAccountApi($username, $password)

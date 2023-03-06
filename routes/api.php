@@ -16,6 +16,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,6 +140,11 @@ Route::group(['prefix' => 'project'], function () {
     Route::put('/{id}', [ProjectController::class, 'edit']);
     Route::delete('/{id}', [ProjectController::class, 'delete']);
 });
+
+Route::group(['prefix' => 'setting'], function () {
+    Route::get('/{id}', [SettingController::class, 'get']);
+});
+
 
 
 
