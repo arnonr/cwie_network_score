@@ -83,10 +83,11 @@ mix.copy('resources/css/loader.css', 'public/css')
 
 mix.webpackConfig({
   output: {
+    // publicPath: 'http://143.198.208.110:8113/',
     chunkFilename: 'js/chunks/[name].[chunkhash].js',
   },
 })
-
+// mix.setResourceRoot('http://143.198.208.110:8113/')
 /*
  |--------------------------------------------------------------------------
  | Browsersync Reloading
