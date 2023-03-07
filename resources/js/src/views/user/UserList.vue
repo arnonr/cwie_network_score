@@ -403,13 +403,13 @@ export default {
         type: item.value.type.code,
         status: 2,
         tel: item.value.tel,
-        project_type_id: item.value.project_type_id.code,
-        project_type_arr: item.value.project_type_id.code,
+        project_type_id: null,
+        project_type_arr: null,
       };
 
-      if (item.value.type.code == "admin") {
-        dataSend.project_type_id = null;
-        dataSend.project_type_arr = null;
+      if (item.value.type.code == "referee") {
+        dataSend.project_type_id = item.value.project_type_id.code;
+        dataSend.project_type_arr = item.value.project_type_id.code;
       }
 
       if (item.value.id == null) {
