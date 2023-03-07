@@ -161,6 +161,20 @@ export default {
         class: "text-center",
       },
       {
+        key: "referee_4.score",
+        label: "ผู้ตัดสินที่ 4",
+        sortable: true,
+        visible: true,
+        class: "text-center",
+      },
+      {
+        key: "referee_5.score",
+        label: "ผู้ตัดสินที่ 5",
+        sortable: true,
+        visible: true,
+        class: "text-center",
+      },
+      {
         key: "score_all",
         label: "รวม",
         sortable: true,
@@ -241,40 +255,40 @@ export default {
 
     fetchProjectTypes();
 
-    const fetchQuestions = () => {
-      store
-        .dispatch("report/fetchQuestions", {
-          project_type_id: advancedSearch.project_type_id.code,
-          orderBy: "level",
-          order: "ASC",
-        })
-        .then((response) => {
-          const { data } = response.data;
-          selectOptions.value.questions = data;
+    // const fetchQuestions = () => {
+    //   store
+    //     .dispatch("report/fetchQuestions", {
+    //       project_type_id: advancedSearch.project_type_id.code,
+    //       orderBy: "level",
+    //       order: "ASC",
+    //     })
+    //     .then((response) => {
+    //       const { data } = response.data;
+    //       selectOptions.value.questions = data;
 
-          data.forEach((d) => {
-            item_score.value["q_" + d.id] = {
-              question_id: d.id,
-              user_id: getUserData().userID,
-              project_id: null,
-              answer: null,
-              status: 1,
-              is_publish: 1,
-            };
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          toast({
-            component: ToastificationContent,
-            props: {
-              title: "Error fetching Project Types's list",
-              icon: "AlertTriangleIcon",
-              variant: "danger",
-            },
-          });
-        });
-    };
+    //       data.forEach((d) => {
+    //         item_score.value["q_" + d.id] = {
+    //           question_id: d.id,
+    //           user_id: getUserData().userID,
+    //           project_id: null,
+    //           answer: null,
+    //           status: 1,
+    //           is_publish: 1,
+    //         };
+    //       });
+    //     })
+    //     .catch((error) => {
+    //       console.log(error);
+    //       toast({
+    //         component: ToastificationContent,
+    //         props: {
+    //           title: "Error fetching Project Types's list",
+    //           icon: "AlertTriangleIcon",
+    //           variant: "danger",
+    //         },
+    //       });
+    //     });
+    // };
 
     //
     const fetchScores = () => {
@@ -317,6 +331,18 @@ export default {
               if (i.hasOwnProperty("referee_3")) {
                 if (i.referee_3.user_id == r.id) {
                   i.referee_3 = { ...i.referee_3, score: score_total };
+                }
+              }
+
+              if (i.hasOwnProperty("referee_4")) {
+                if (i.referee_4.user_id == r.id) {
+                  i.referee_4 = { ...i.referee_4, score: score_total };
+                }
+              }
+
+              if (i.hasOwnProperty("referee_5")) {
+                if (i.referee_5.user_id == r.id) {
+                  i.referee_5 = { ...i.referee_5, score: score_total };
                 }
               }
 
