@@ -218,7 +218,9 @@ export default {
     const fetchProjectTypes = () => {
       let searchProjectTypes = {};
       if (isReferee) {
-        searchProjectTypes.id = getUserData().project_type_id;
+        const project_type_arr = getUserData().project_type_arr.split(",");
+        // searchProjectTypes.id = getUserData().project_type_id;
+        searchProjectTypes.id_arr = project_type_arr;
       }
 
       store
@@ -255,42 +257,6 @@ export default {
 
     fetchProjectTypes();
 
-    // const fetchQuestions = () => {
-    //   store
-    //     .dispatch("report/fetchQuestions", {
-    //       project_type_id: advancedSearch.project_type_id.code,
-    //       orderBy: "level",
-    //       order: "ASC",
-    //     })
-    //     .then((response) => {
-    //       const { data } = response.data;
-    //       selectOptions.value.questions = data;
-
-    //       data.forEach((d) => {
-    //         item_score.value["q_" + d.id] = {
-    //           question_id: d.id,
-    //           user_id: getUserData().userID,
-    //           project_id: null,
-    //           answer: null,
-    //           status: 1,
-    //           is_publish: 1,
-    //         };
-    //       });
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //       toast({
-    //         component: ToastificationContent,
-    //         props: {
-    //           title: "Error fetching Project Types's list",
-    //           icon: "AlertTriangleIcon",
-    //           variant: "danger",
-    //         },
-    //       });
-    //     });
-    // };
-
-    //
     const fetchScores = () => {
       store
         .dispatch("report/fetchScores", {
@@ -398,11 +364,11 @@ export default {
 
     const fetchReferee = () => {
       let searchUser = {
-        project_type_id: advancedSearch.project_type_id.code,
+        project_type_arr: advancedSearch.project_type_id.code,
       };
       if (isReferee) {
         searchUser = {
-          project_type_id: advancedSearch.project_type_id.code,
+          project_type_arr: advancedSearch.project_type_id.code,
           id: getUserData().userID,
         };
       }
@@ -448,6 +414,8 @@ export default {
       isOverLay.value = true;
 
       let search = { ...advancedSearch };
+
+
 
       if (search.project_type_id) {
         if (search.project_type_id.hasOwnProperty("code")) {

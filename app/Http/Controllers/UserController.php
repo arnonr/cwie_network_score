@@ -171,6 +171,16 @@ class UserController extends Controller
         if ($request->project_type_id) {
             $items->where('user.project_type_id', $request->project_type_id);
         }
+
+        if($request->project_type_arr){
+            $items->where(function ($query) use ($request) {
+                $query->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_id.",%")
+                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_id.",%")
+                ->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_id)
+                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_id);
+            });
+        }
+
         if ($request->status) {
             $items->where('user.status', $request->status);
         }
