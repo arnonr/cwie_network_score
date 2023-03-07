@@ -403,9 +403,14 @@ export default {
         type: item.value.type.code,
         status: 2,
         tel: item.value.tel,
-        project_type_id: item.value.project_type_id.code, 
+        project_type_id: item.value.project_type_id.code,
         project_type_arr: item.value.project_type_id.code,
       };
+
+      if (item.value.type.code == "admin") {
+        dataSend.project_type_id = null;
+        dataSend.project_type_arr = null;
+      }
 
       if (item.value.id == null) {
         store
@@ -550,11 +555,7 @@ export default {
             />
           </b-form-group>
 
-          <b-form-group
-            label="ประเภทผู้ใช้"
-            label-for="type"
-            class="col-md-6"
-          >
+          <b-form-group label="ประเภทผู้ใช้" label-for="type" class="col-md-6">
             <v-select
               v-model="advancedSearch.type"
               :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
@@ -734,10 +735,7 @@ export default {
                     label-for="prefix"
                     class="col-md"
                   >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="prefix"
-                    >
+                    <validation-provider #default="{ errors }" name="prefix">
                       <b-form-input
                         id="prefix"
                         placeholder=""
@@ -755,10 +753,7 @@ export default {
                     label-for="firstname"
                     class="col-md"
                   >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="firstname"
-                    >
+                    <validation-provider #default="{ errors }" name="firstname">
                       <b-form-input
                         id="firstname"
                         placeholder=""
@@ -776,10 +771,7 @@ export default {
                     label-for="flastname"
                     class="col-md"
                   >
-                    <validation-provider
-                      #default="{ errors }"
-                      name="lastname"
-                    >
+                    <validation-provider #default="{ errors }" name="lastname">
                       <b-form-input
                         id="lastname"
                         placeholder=""
@@ -792,11 +784,7 @@ export default {
                 </div>
 
                 <div class="row">
-                  <b-form-group
-                    label="โทรศัพท์"
-                    label-for="tel"
-                    class="col-md"
-                  >
+                  <b-form-group label="โทรศัพท์" label-for="tel" class="col-md">
                     <validation-provider
                       #default="{ errors }"
                       name="tel"
