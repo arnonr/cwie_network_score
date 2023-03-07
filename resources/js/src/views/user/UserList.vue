@@ -403,7 +403,8 @@ export default {
         type: item.value.type.code,
         status: 2,
         tel: item.value.tel,
-        project_type_id: item.value.project_type_id.code,
+        project_type_id: item.value.project_type_id.code, 
+        project_type_arr: item.value.project_type_id.code,
       };
 
       if (item.value.id == null) {
