@@ -29,7 +29,8 @@ class UserController extends Controller
                 'user.status as status',
                 'user.tel as tel',
                 'user.project_type_id as project_type_id',
-                'project_type.name as project_type_name'
+                'project_type.name as project_type_name',
+                'project_type_arr as project_type_arr'
             )
             ->leftJoin('project_type','project_type.id','=','user.project_type_id')
             ->where('user.id', $id)
@@ -137,7 +138,8 @@ class UserController extends Controller
             'user.status as status',
             'user.tel as tel',
             'user.project_type_id as project_type_id',
-            'project_type.name as project_type_name'
+            'project_type.name as project_type_name',
+            'project_type_arr as project_type_arr'
         )
         ->leftJoin('project_type','project_type.id','=','user.project_type_id')
         ->where('user.deleted_at', null);
@@ -217,6 +219,7 @@ class UserController extends Controller
         $data->tel = $request->tel;
         $data->password = bcrypt($request->tel);
         $data->project_type_id = $request->project_type_id;
+        $data->project_type_arr = $request->project_type_arr;
 
         $data->save();
 
@@ -247,6 +250,7 @@ class UserController extends Controller
         $data->status = $request->status;
         $data->tel = $request->tel;
         $data->project_type_id = $request->project_type_id;
+        $data->project_type_arr = $request->project_type_arr;
 
         $data->password = bcrypt($request->tel);
         $data->save();

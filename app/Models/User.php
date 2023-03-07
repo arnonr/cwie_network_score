@@ -39,6 +39,7 @@ class User extends Authenticatable
         'account_type',
         'type',
         'project_type_id',
+        'project_type_arr',
         'status',
         'email_person_id',
         'remember_token',

@@ -43,6 +43,10 @@ import { ValidationProvider, ValidationObserver } from "vee-validate";
 import { required } from "@validations";
 import { getUserData } from "@/auth/utils";
 
+import { extend } from "vee-validate";
+import { max_value } from "vee-validate/dist/rules";
+extend("max_value", max_value);
+
 export default {
   components: {
     BCard,
@@ -69,6 +73,7 @@ export default {
     required,
     BFormTextarea,
     BInputGroup,
+    max_value,
   },
   setup() {
     const SCORE_APP_STORE_MODULE_NAME = "score-list";
@@ -222,10 +227,15 @@ export default {
         });
       });
 
+    // console.log(getUserData().project_type_arr);
+    const project_type_arr = getUserData().project_type_arr.split(",");
+
     const fetchProjectTypes = () => {
       let searchProjectTypes = {};
+
       if (isReferee) {
-        searchProjectTypes.id = getUserData().project_type_id;
+        // searchProjectTypes.id = getUserData().project_type_id;
+        searchProjectTypes.id_arr = project_type_arr;
       }
 
       store
@@ -246,6 +256,9 @@ export default {
                 return d.code == getUserData().project_type_id;
               });
           }
+
+          fetchQuestions();
+          fetchItems();
         })
         .catch((error) => {
           console.log(error);
@@ -265,7 +278,8 @@ export default {
     const fetchQuestions = () => {
       store
         .dispatch("score-list/fetchQuestions", {
-          project_type_id: getUserData().project_type_id,
+          // project_type_id: getUserData().project_type_id,
+          project_type_id: advancedSearch.project_type_id.code,
           orderBy: "level",
           order: "ASC",
         })
@@ -309,8 +323,6 @@ export default {
         });
     };
 
-    fetchQuestions();
-
     store
       .dispatch("score-list/fetchUniversities")
       .then((response) => {
@@ -351,9 +363,9 @@ export default {
         }
       }
 
-      if (isReferee) {
-        search.project_type_id = getUserData().project_type_id;
-      }
+      // if (isReferee) {
+      //   search.project_type_id = getUserData().project_type_id;
+      // }
 
       store
         .dispatch("score-list/fetchProjects", {
@@ -382,11 +394,17 @@ export default {
           isOverLay.value = false;
         });
     };
-    fetchItems();
 
-    watchEffect(() => {
-      fetchItems();
-    });
+    watch(
+      () => advancedSearch.project_type_id,
+      (value) => {
+        if (advancedSearch.project_type_id.hasOwnProperty("code")) {
+          fetchQuestions();
+        }
+      }
+    );
+
+    // fetchQuestions();
 
     const onChangePage = (page) => {
       currentPage.value = page;
@@ -486,38 +504,40 @@ export default {
 
         let answer = null;
 
-        if (score.answer.hasOwnProperty("code")) {
-          answer = score.answer.code;
-        } else {
-          answer = score.answer;
-        }
+        if (score.answer != null) {
+          if (score.answer.hasOwnProperty("code")) {
+            answer = score.answer.code;
+          } else {
+            answer = score.answer;
+          }
 
-        let dataSend = {
-          question_id: score.question_id,
-          user_id: score.user_id,
-          project_id: score.project_id,
-          answer: answer,
-          status: score.status,
-          is_publish: score.is_publish,
-        };
+          let dataSend = {
+            question_id: score.question_id,
+            user_id: score.user_id,
+            project_id: score.project_id,
+            answer: answer,
+            status: score.status,
+            is_publish: score.is_publish,
+          };
 
-        store
-          .dispatch("score-list/addScore", dataSend)
-          .then(async (response) => {
-            if (response.data.message == "success") {
-              fetchItems();
-            } else {
+          store
+            .dispatch("score-list/addScore", dataSend)
+            .then(async (response) => {
+              if (response.data.message == "success") {
+                fetchItems();
+              } else {
+                isSubmit.value = false;
+                isModal.value = false;
+                isOverLay.value = false;
+                errorToast(response.data.message);
+              }
+            })
+            .catch(() => {
               isSubmit.value = false;
-              isModal.value = false;
               isOverLay.value = false;
-              errorToast(response.data.message);
-            }
-          })
-          .catch(() => {
-            isSubmit.value = false;
-            isOverLay.value = false;
-            errorToast("Add Score Error");
-          });
+              errorToast("Add Score Error");
+            });
+        }
       });
 
       isSubmit.value = false;
@@ -811,11 +831,10 @@ export default {
                     <validation-provider
                       #default="{ errors }"
                       :name="'q_' + q.id"
+                      :rules="'max_value:' + q.total_score"
+                      v-if="q.is_check != 1"
                     >
-                      <b-input-group
-                        :append="'/' + q.total_score"
-                        v-if="q.is_check != 1"
-                      >
+                      <b-input-group :append="'/' + q.total_score">
                         <b-form-input
                           :id="'q_' + q.id"
                           placeholder=""
@@ -825,7 +844,13 @@ export default {
                           :disabled="isClose"
                         />
                       </b-input-group>
-
+                      <small class="text-danger">{{ errors[0] }}</small>
+                    </validation-provider>
+                    <validation-provider
+                      #default="{ errors }"
+                      :name="'q_' + q.id"
+                      v-if="q.is_check == 1"
+                    >
                       <v-select
                         :input-id="'q_' + q.id"
                         label="title"
@@ -838,7 +863,6 @@ export default {
                         placeholder=""
                         :disabled="isClose"
                         :clearable="false"
-                        v-if="q.is_check == 1"
                       />
                       <small class="text-danger">{{ errors[0] }}</small>
                     </validation-provider>

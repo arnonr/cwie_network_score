@@ -119,6 +119,7 @@ class AuthController extends Controller
             'type' => $userDB->type,
             'status' => $userDB->status,
             'project_type_id' => $userDB->project_type_id,
+            'project_type_arr' => $userDB->project_type_arr,
             'role' => $role,
             'ability' => $ability,
         ];

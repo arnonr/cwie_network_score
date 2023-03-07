@@ -43,6 +43,10 @@ class ProjectTypeController extends Controller
             $data->where('is_publish',$request->is_publish);
         }
 
+        if($request->id_arr){
+            $data->whereIn('id',$request->id_arr);
+        }
+
         $order_by = $request->order_by ? $request->order_by : 'id';
         $order = $request->order ? $request->order : 'asc';
 
