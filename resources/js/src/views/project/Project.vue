@@ -633,7 +633,7 @@ export default {
                     alt="ดูข้อมูล"
                     title="ดูข้อมูล"
                     class="btn-icon btn-sm"
-                    :href="'http://localhost:8113/storage/document/'+row.item.code+'.pdf'"
+                    :href="'http://143.198.208.110:8113/storage/document/'+row.item.code+'.pdf'"
                     target="_blank"
                   >
                     <feather-icon icon="EyeIcon" style="margin-bottom: -2px" />
