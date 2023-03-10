@@ -174,10 +174,10 @@ class UserController extends Controller
 
         if($request->project_type_arr){
             $items->where(function ($query) use ($request) {
-                $query->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_id.",%")
-                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_id.",%")
-                ->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_id)
-                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_id);
+                $query->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_arr.",%")
+                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_arr.",%")
+                ->orWhere('user.project_type_arr', 'LIKE',"%,".$request->project_type_arr)
+                ->orWhere('user.project_type_arr', 'LIKE',$request->project_type_arr);
             });
         }
 
@@ -190,7 +190,7 @@ class UserController extends Controller
             $items = $items->orderBy($request->orderBy, $request->order);
             
         }else{
-            $items = $items->orderBy('id', 'desc');
+            $items = $items->orderBy('id', 'asc');
         }
     
         $count = $items->count();

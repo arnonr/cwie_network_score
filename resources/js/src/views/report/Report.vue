@@ -320,7 +320,7 @@ export default {
             return i;
           });
 
-          console.log(items.value);
+          // console.log(items.value);
         })
         .catch((error) => {
           console.log(error);
